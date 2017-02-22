@@ -1,0 +1,17 @@
+<h2>beer list</h2>
+
+{% if beer_list %}
+<div>
+    {% for beer in beer_list %}
+    <div>
+        <h4><a href="{% url 'reviews:beer_detail' beer.id %}">
+        {{ beer.name }}
+        </a></h4>
+        <h5>{{ beer.review_set.count }} reviews</h5>
+        <h5>{{ beer.average_rating | floatformat }} average rating</h5>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+    <p>No beers are available.</p>
+{% endif %}
