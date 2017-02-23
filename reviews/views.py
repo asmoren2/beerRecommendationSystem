@@ -1,5 +1,9 @@
 from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
 from .models import Review, Beer
+from .forms import ReviewForm
+import datetime
 # views are supposedly just python functions that decide what to show.
 # Create your views here.
 
@@ -26,4 +30,29 @@ def beer_list(request):
 # gets a beer from the DB given its ID and renders it using beer_detail.html
 def beer_detail(request, beer_id):
     beer = get_object_or_404(Beer, pk=beer_id)
-    return render(request, 'reviews/beer_detail.html', {'beer': beer})
+    form = ReviewForm()
+    return render(request, 'reviews/beer_detail.html', {'beer': beer, 'form': form})
+
+def add_review(request, beer_id):
+#retrieve beer we will add review for if not availbale display 404 error.
+    beer = get_object_or_404(Beer, pk=beer_id)
+    # create review form instance
+    form = ReviewForm(request.POST)
+    # validate data
+    if form.is_valid():
+        rating = form.cleaned_data['rating']
+        comment = form.cleaned_data['comment']
+        user_name = form.cleaned_data['user_name']
+        review = Review()
+        review.beer = beer
+        review.user_name = user_name
+        review.rating = rating
+        review.comment = comment
+        review.pub_date = datetime.datetime.now()
+        review.save()
+        # Always return an HttpResponseRedirect after successfully dealing
+        # with POST data. This prevents data from being posted twice if a
+        # user hits the Back button.
+        return HttpResponseRedirect(reverse('reviews:beer_detail', args=(beer.id,)))
+
+    return render(request, 'reviews/beer_detail.html', {'beer': beer, 'form': form})

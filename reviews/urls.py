@@ -10,4 +10,6 @@ urlpatterns = [
     url(r'^beer$', views.beer_list, name='beer_list'),
     # ex: /beer/5/
     url(r'^beer/(?P<beer_id>[0-9]+)/$', views.beer_detail, name='beer_detail'),
+    url(r'^beer/(?P<beer_id>[0-9]+)/add_review/$', views.add_review, name='add_review'),
+
 ]
