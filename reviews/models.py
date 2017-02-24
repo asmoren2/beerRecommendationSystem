@@ -6,8 +6,9 @@ import numpy as np
 class Beer(models.Model):
     name = models.CharField(max_length=200)
 
+    # In Python 3 map returns an iterator so we need to cast to list so we get the list we want.
     def average_rating(self):
-        all_ratings = map(lambda x: x.rating, self.review_set.all())
+        all_ratings = list(map(lambda x: x.rating, self.review_set.all()))
         return np.mean(all_ratings)
 
     def __unicode__(self):
@@ -27,4 +28,3 @@ class Review(models.Model):
     user_name = models.CharField(max_length=100)
     comment = models.CharField(max_length=200)
     rating = models.IntegerField(choices=RATING_CHOICES)
-
