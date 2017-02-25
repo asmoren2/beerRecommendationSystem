@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from .models import Review, Beer
 from .forms import ReviewForm
 import datetime
@@ -33,6 +35,8 @@ def beer_detail(request, beer_id):
     form = ReviewForm()
     return render(request, 'reviews/beer_detail.html', {'beer': beer, 'form': form})
 
+#@login_required is needed to make sure user is signed in so that they can add a review.
+@login_required
 def add_review(request, beer_id):
 #retrieve beer we will add review for if not availbale display 404 error.
     beer = get_object_or_404(Beer, pk=beer_id)
@@ -42,7 +46,7 @@ def add_review(request, beer_id):
     if form.is_valid():
         rating = form.cleaned_data['rating']
         comment = form.cleaned_data['comment']
-        user_name = form.cleaned_data['user_name']
+        user_name = request.user.username
         review = Review()
         review.beer = beer
         review.user_name = user_name
