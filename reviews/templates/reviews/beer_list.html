@@ -1,5 +1,11 @@
-<h2>beer list</h2>
 
+{% extends 'reviews/base.html' %}
+
+{% block title%}
+<h2>Beer list</h2>
+{% endblock %}
+
+{% block content %}
 {% if beer_list %}
 <div>
     {% for beer in beer_list %}
@@ -15,3 +21,4 @@
 {% else %}
     <p>No beers are available.</p>
 {% endif %}
+{% endblock %}
