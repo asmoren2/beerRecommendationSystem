@@ -3,9 +3,10 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Review, Beer
+from .models import Review, Beer, Cluster
 from .forms import ReviewForm
 import datetime
+import operator
 # views are supposedly just python functions that decide what to show.
 # Create your views here.
 
@@ -70,16 +71,34 @@ def user_review_list(request, username=None):
 
 @login_required
 def user_recommendation_list(request):
-    return render(request, 'reviews/user_recommendation_list.html', {'username': request.user.username})
-
-@login_required
-def user_recommendation_list(request):
     # get this user reviews
     user_reviews = Review.objects.filter(user_name=request.user.username).prefetch_related('beer')
     # from the reviews, get a set of wine IDs
     user_reviews_beer_ids = set(map(lambda x: x.beer.id, user_reviews))
-    # then get a wine list excluding the previous IDs
-    beer_list = Beer.objects.exclude(id__in=user_reviews_beer_ids)
+
+    # get request user cluster name (just the first one righ now)
+    user_cluster_name = \
+        User.objects.get(username=request.user.username).cluster_set.first().name
+
+    # get usernames for other memebers of the cluster
+    user_cluster_other_members = \
+        Cluster.objects.get(name=user_cluster_name).users \
+            .exclude(username=request.user.username).all()
+    other_members_usernames = set(map(lambda x: x.username, user_cluster_other_members))
+
+     # get reviews by those users, excluding wines reviewed by the request user
+    other_users_reviews = \
+        Review.objects.filter(user_name__in=other_members_usernames) \
+            .exclude(beer__id__in=user_reviews_beer_ids)
+    other_users_reviews_beer_ids = set(map(lambda x: x.beer.id, other_users_reviews))
+
+    test = Beer.objects.filter(id__in=other_users_reviews_beer_ids)
+    # then get a beer list including the previous IDs, order by rating
+    beer_list = sorted(
+        test, \
+        key= operator.methodcaller('average_rating'), \
+        reverse=True
+    )
 
     return render(
         request,
