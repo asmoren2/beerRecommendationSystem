@@ -15,5 +15,6 @@ urlpatterns = [
     url(r'^review/user/(?P<username>\w+)/$', views.user_review_list, name='user_review_list'),
     # ex: /review/user - get reviews for the user passed in the url
     url(r'^review/user/$', views.user_review_list, name='user_review_list'),
-
+    # ex: /recommendation - get wine recommendations for the logged user
+    url(r'^recommendation/$', views.user_recommendation_list, name='user_recommendation_list'),
 ]

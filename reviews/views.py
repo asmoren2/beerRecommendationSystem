@@ -67,3 +67,22 @@ def user_review_list(request, username=None):
     latest_review_list = Review.objects.filter(user_name=username).order_by('-pub_date')
     context = {'latest_review_list':latest_review_list, 'username':username}
     return render(request, 'reviews/user_review_list.html', context)
+
+@login_required
+def user_recommendation_list(request):
+    return render(request, 'reviews/user_recommendation_list.html', {'username': request.user.username})
+
+@login_required
+def user_recommendation_list(request):
+    # get this user reviews
+    user_reviews = Review.objects.filter(user_name=request.user.username).prefetch_related('beer')
+    # from the reviews, get a set of wine IDs
+    user_reviews_beer_ids = set(map(lambda x: x.beer.id, user_reviews))
+    # then get a wine list excluding the previous IDs
+    beer_list = Beer.objects.exclude(id__in=user_reviews_beer_ids)
+
+    return render(
+        request,
+        'reviews/user_recommendation_list.html',
+        {'username': request.user.username,'beer_list': beer_list}
+    )
